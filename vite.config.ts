@@ -13,11 +13,11 @@ export default defineConfig(({mode}) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
+        'firebase/firestore': path.resolve(__dirname, 'src/supabase-firestore.ts'),
+        'firebase/auth': path.resolve(__dirname, 'src/supabase-auth.ts'),
       },
     },
     server: {
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
     },
   };
