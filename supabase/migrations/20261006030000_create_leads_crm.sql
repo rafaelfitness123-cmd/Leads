@@ -82,9 +82,35 @@ create table if not exists public.lead_history (
   created_at timestamptz not null default now()
 );
 
+create index if not exists boards_owner_id_idx on public.boards(owner_id);
+create index if not exists leads_owner_id_idx on public.leads(owner_id);
+create index if not exists leads_board_id_idx on public.leads(board_id);
+create index if not exists leads_status_idx on public.leads(status);
+create index if not exists message_campaigns_owner_id_idx on public.message_campaigns(owner_id);
+create index if not exists message_variations_campaign_id_idx on public.message_variations(campaign_id);
+create index if not exists lead_history_lead_id_idx on public.lead_history(lead_id);
+
 alter table public.profiles enable row level security;
 alter table public.boards enable row level security;
 alter table public.leads enable row level security;
 alter table public.message_campaigns enable row level security;
 alter table public.message_variations enable row level security;
 alter table public.lead_history enable row level security;
+
+drop policy if exists "profiles_select_own" on public.profiles;
+drop policy if exists "profiles_insert_own" on public.profiles;
+drop policy if exists "profiles_update_own" on public.profiles;
+drop policy if exists "boards_owner_all" on public.boards;
+drop policy if exists "leads_owner_all" on public.leads;
+drop policy if exists "campaigns_owner_all" on public.message_campaigns;
+drop policy if exists "variations_owner_all" on public.message_variations;
+drop policy if exists "history_owner_all" on public.lead_history;
+
+create policy "profiles_select_own" on public.profiles for select to authenticated using ((select auth.uid()) = id);
+create policy "profiles_insert_own" on public.profiles for insert to authenticated with check ((select auth.uid()) = id);
+create policy "profiles_update_own" on public.profiles for update to authenticated using ((select auth.uid()) = id) with check ((select auth.uid()) = id);
+create policy "boards_owner_all" on public.boards for all to authenticated using ((select auth.uid()) = owner_id) with check ((select auth.uid()) = owner_id);
+create policy "leads_owner_all" on public.leads for all to authenticated using ((select auth.uid()) = owner_id) with check ((select auth.uid()) = owner_id);
+create policy "campaigns_owner_all" on public.message_campaigns for all to authenticated using ((select auth.uid()) = owner_id) with check ((select auth.uid()) = owner_id);
+create policy "variations_owner_all" on public.message_variations for all to authenticated using ((select auth.uid()) = owner_id) with check ((select auth.uid()) = owner_id);
+create policy "history_owner_all" on public.lead_history for all to authenticated using ((select auth.uid()) = owner_id) with check ((select auth.uid()) = owner_id);
