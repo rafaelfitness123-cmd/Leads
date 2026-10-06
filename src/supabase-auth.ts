@@ -57,37 +57,36 @@ export async function signOut(_auth: typeof auth) {
 export function onAuthStateChanged(_auth: typeof auth, callback: (user: User | null) => void | Promise<void>) {
   let active = true;
 
-  const emit = (rawUser: any) => {
+  const deliver = (rawUser: any) => {
+    if (!active) return;
     const normalized = normalizeUser(rawUser);
     auth.currentUser = normalized;
-
-    // Supabase warns against awaiting other Supabase calls directly inside
-    // onAuthStateChange. App.tsx creates/reads the profile from this callback,
-    // so defer it until the auth event lock has been released.
-    setTimeout(() => {
-      if (!active) return;
-      Promise.resolve(callback(normalized)).catch((error) => {
-        console.error('Auth state callback failed:', error);
-      });
-    }, 0);
+    Promise.resolve(callback(normalized)).catch((error) => {
+      console.error('Auth state callback failed:', error);
+    });
   };
 
-  supabase.auth.getUser().then(({ data, error }) => {
-    if (!active) return;
-    if (error) {
-      console.error('Failed to restore Supabase user:', error);
-      emit(null);
-      return;
-    }
-    emit(data.user);
-  }).catch((error) => {
-    console.error('Failed to restore Supabase session:', error);
-    emit(null);
-  });
+  // Restore from the locally persisted Supabase session first. This avoids
+  // waiting on an extra /user request after returning from Google OAuth.
+  supabase.auth.getSession()
+    .then(({ data, error }) => {
+      if (!active) return;
+      if (error) {
+        console.error('Failed to restore Supabase session:', error);
+        deliver(null);
+        return;
+      }
+      deliver(data.session?.user ?? null);
+    })
+    .catch((error) => {
+      console.error('Failed to restore Supabase session:', error);
+      deliver(null);
+    });
 
   const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
-    if (!active) return;
-    emit(session?.user ?? null);
+    // Avoid running application Supabase queries while the auth event is
+    // holding its internal lock.
+    setTimeout(() => deliver(session?.user ?? null), 0);
   });
 
   return () => {
