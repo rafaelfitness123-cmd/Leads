@@ -13,7 +13,8 @@ import {
   Plus,
   Bell,
   ChevronRight,
-  User as UserIcon
+  User as UserIcon,
+  CalendarClock
 } from 'lucide-react';
 import { auth, db } from './firebase';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, User } from 'firebase/auth';
@@ -26,6 +27,7 @@ import Dashboard from './components/Dashboard';
 import Boards from './components/Boards';
 import Leads from './components/Leads';
 import Messages from './components/Messages';
+import Automations from './components/Automations';
 import Import from './components/Import';
 import Reports from './components/Reports';
 import Config from './components/Config';
@@ -38,45 +40,55 @@ export default function App() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const userRef = doc(db, 'users', user.uid);
-        const userSnap = await getDoc(userRef);
-        
-        if (!userSnap.exists()) {
-          await setDoc(userRef, {
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            photoURL: user.photoURL,
-            role: 'user',
-            createdAt: Timestamp.now()
-          });
+      try {
+        if (user) {
+          const userRef = doc(db, 'users', user.uid);
+          const userSnap = await getDoc(userRef);
+          
+          if (!userSnap.exists()) {
+            await setDoc(userRef, {
+              uid: user.uid,
+              email: user.email,
+              displayName: user.displayName,
+              photoURL: user.photoURL,
+              role: 'user',
+              createdAt: Timestamp.now()
+            });
+          }
+          setUser(user);
+        } else {
+          setUser(null);
         }
-        setUser(user);
-      } else {
-        setUser(null);
+      } catch (error) {
+        console.error('Erro ao inicializar usuário:', error);
+        setUser(user || null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
-    return () => unsubscribe();
+    const timeout = window.setTimeout(() => setLoading(false), 8000);
+    return () => {
+      window.clearTimeout(timeout);
+      unsubscribe();
+    };
   }, []);
 
   const handleLogin = async () => {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      toast.success('Successfully logged in!');
+      toast.success('Login realizado!');
     } catch (error) {
       console.error(error);
-      toast.error('Login failed. Please try again.');
+      toast.error('Falha no login. Tente novamente.');
     }
   };
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      toast.success('Logged out successfully');
+      toast.success('Sessão encerrada');
     } catch (error) {
       console.error(error);
     }
@@ -125,6 +137,7 @@ export default function App() {
     { id: 'boards', label: 'Quadros', icon: Columns },
     { id: 'leads', label: 'Leads', icon: Users },
     { id: 'messages', label: 'Mensagens', icon: MessageSquare },
+    { id: 'automations', label: 'Automações', icon: CalendarClock },
     { id: 'import', label: 'Importação', icon: FileUp },
     { id: 'reports', label: 'Relatórios', icon: BarChart3 },
     { id: 'config', label: 'Configurações', icon: Settings },
@@ -234,6 +247,7 @@ export default function App() {
                 />
               )}
               {activeTab === 'messages' && <Messages />}
+              {activeTab === 'automations' && <Automations />}
               {activeTab === 'import' && <Import initialBoardId={selectedBoardId} />}
               {activeTab === 'reports' && <Reports />}
               {activeTab === 'config' && <Config />}
