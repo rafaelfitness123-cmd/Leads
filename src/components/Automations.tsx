@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { CalendarClock, CheckCircle2, Clock3, MessageSquare, Pause, Play, Plus, ShieldCheck, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '../supabase';
+import WhatsAppConnection from './WhatsAppConnection';
 
 interface Board { id: string; name: string; }
 interface Template { id: string; name: string; meta_template_name: string; language: string; body_preview?: string | null; }
@@ -138,6 +139,8 @@ export default function Automations() {
         <p className="text-slate-500 mt-1">Crie sequências em horários diferentes, com limite diário e intervalo entre contatos.</p>
       </header>
 
+      <WhatsAppConnection />
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="premium-card p-5"><Users className="text-brand-600 mb-3"/><p className="text-sm text-slate-500">Com telefone</p><p className="text-2xl font-bold">{withPhone.length}</p></div>
         <div className="premium-card p-5"><ShieldCheck className="text-emerald-600 mb-3"/><p className="text-sm text-slate-500">Autorizados</p><p className="text-2xl font-bold">{allowed.length}</p></div>
@@ -182,7 +185,7 @@ export default function Automations() {
 
       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
         <div className="font-semibold flex gap-2 items-center"><Clock3 size={17}/>Envio externo</div>
-        <p className="mt-1">A agenda e a fila já ficam no Supabase. Para o disparo real, ainda é necessário conectar as credenciais da WhatsApp Business Platform e os templates aprovados pela Meta no backend.</p>
+        <p className="mt-1">A agenda e a fila já ficam no Supabase. Para o disparo real, ainda é necessário concluir a conexão da WhatsApp Business Platform ou conectar um provedor QR no backend.</p>
       </div>
     </div>
   );
