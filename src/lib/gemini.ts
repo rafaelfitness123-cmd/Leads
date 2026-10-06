@@ -1,7 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
 export interface ParsedLead {
   profile_name?: string;
   instagram_handle: string;
@@ -12,18 +10,26 @@ export interface ParsedLead {
   raw_text: string;
 }
 
+function getGeminiClient() {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    throw new Error(
+      'GEMINI_API_KEY não configurada. Adicione essa variável no Vercel para usar a importação inteligente.'
+    );
+  }
+
+  return new GoogleGenAI({ apiKey });
+}
+
 export async function parseRawText(text: string): Promise<ParsedLead[]> {
   if (!text.trim()) return [];
 
   try {
+    const ai = getGeminiClient();
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `Extract Instagram profile information from the following raw text (likely from Google search results). 
-      Focus on identifying the @instagram_handle correctly.
-      
-      Raw text:
-      ${text}
-      `,
+      contents: `Extract Instagram profile information from the following raw text (likely from Google search results).\n      Focus on identifying the @instagram_handle correctly.\n      \n      Raw text:\n      ${text}\n      `,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -47,10 +53,10 @@ export async function parseRawText(text: string): Promise<ParsedLead[]> {
     const result = JSON.parse(response.text || "[]");
     return result.map((item: any) => ({
       ...item,
-      raw_text: text.substring(0, 500) // Store a snippet of raw text
+      raw_text: text.substring(0, 500)
     }));
   } catch (error) {
     console.error("Error parsing text with Gemini:", error);
-    return [];
+    throw error;
   }
 }
