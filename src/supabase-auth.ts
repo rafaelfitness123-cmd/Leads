@@ -54,21 +54,40 @@ export async function signOut(_auth: typeof auth) {
   auth.currentUser = null;
 }
 
-export function onAuthStateChanged(_auth: typeof auth, callback: (user: User | null) => void) {
+export function onAuthStateChanged(_auth: typeof auth, callback: (user: User | null) => void | Promise<void>) {
   let active = true;
 
-  supabase.auth.getUser().then(({ data }) => {
-    if (!active) return;
-    const normalized = normalizeUser(data.user);
+  const emit = (rawUser: any) => {
+    const normalized = normalizeUser(rawUser);
     auth.currentUser = normalized;
-    callback(normalized);
+
+    // Supabase warns against awaiting other Supabase calls directly inside
+    // onAuthStateChange. App.tsx creates/reads the profile from this callback,
+    // so defer it until the auth event lock has been released.
+    setTimeout(() => {
+      if (!active) return;
+      Promise.resolve(callback(normalized)).catch((error) => {
+        console.error('Auth state callback failed:', error);
+      });
+    }, 0);
+  };
+
+  supabase.auth.getUser().then(({ data, error }) => {
+    if (!active) return;
+    if (error) {
+      console.error('Failed to restore Supabase user:', error);
+      emit(null);
+      return;
+    }
+    emit(data.user);
+  }).catch((error) => {
+    console.error('Failed to restore Supabase session:', error);
+    emit(null);
   });
 
   const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
     if (!active) return;
-    const normalized = normalizeUser(session?.user ?? null);
-    auth.currentUser = normalized;
-    callback(normalized);
+    emit(session?.user ?? null);
   });
 
   return () => {
