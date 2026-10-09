@@ -138,7 +138,7 @@ export default function WhatsAppConnection() {
   };
 
   const prepareConnection = async () => {
-    if (!providerConfigured) return toast.error('Configure primeiro o serviço QR e sua chave de API.');
+    if (!providerConfigured) return toast.error('Configure primeiro o serviço QR e o token da instância.');
     if (!phoneValidated || !phoneIsValid) return toast.error('Valide o número antes de continuar.');
     setBusy(true);
     const result = await invokeWhatsApp({ action: 'prepare', phone: normalizedPhone });
@@ -162,6 +162,27 @@ export default function WhatsAppConnection() {
     } else {
       toast.info(result.message || 'Aguardando confirmação no celular.');
     }
+  };
+
+  const generatePairingCode = async () => {
+    if (!providerConfigured) return toast.error('Configure primeiro o serviço QR e o token da instância.');
+    if (!phoneValidated || !phoneIsValid) return toast.error('Valide o número antes de continuar.');
+    setBusy(true);
+    const result = await invokeWhatsApp({ action: 'pair', phone: normalizedPhone });
+    setBusy(false);
+    if (!result?.ok) return toast.error(result?.error || 'Não foi possível gerar o código de pareamento.');
+    setConnection(prev => prev ? {
+      ...prev,
+      provider: 'qr_provider',
+      status: 'pending',
+      phone_number: normalizedPhone,
+      provider_account_id: result.instanceName || prev.provider_account_id,
+      last_error: null,
+    } : prev);
+    setQrCode('');
+    setPairingCode(result.pairingCode || '');
+    setTestPhone(normalizedPhone);
+    toast.success('Código gerado. Digite-o no WhatsApp do celular.');
   };
 
   const checkStatus = async () => {
@@ -222,20 +243,20 @@ export default function WhatsAppConnection() {
 
       <div className="rounded-2xl border border-slate-200 p-5 bg-white space-y-3">
         <div className="flex items-center gap-2"><Settings2 size={19}/><h4 className="font-bold text-slate-900">1. Serviço que gera o QR</h4></div>
-        <p className="text-sm text-slate-600">O Horizon precisa de uma API Evolution ou compatível rodando em um servidor. A URL e a chave são enviadas ao backend; a chave fica protegida no Supabase Vault e não volta a aparecer na tela.</p>
-        <label className="text-sm font-semibold text-slate-700 block">URL base da API</label>
+        <p className="text-sm text-slate-600">O Horizon usa as rotas do Evolution Go para gerar QR, consultar a sessão e enviar mensagens. A URL e o token são enviados ao backend; o token fica protegido no Supabase Vault e não volta a aparecer na tela.</p>
+        <label className="text-sm font-semibold text-slate-700 block">URL base da API Evolution Go</label>
         <input
           value={providerUrl}
           onChange={e => setProviderUrl(e.target.value)}
-          placeholder="https://sua-api-evolution.com"
+          placeholder="https://api-do-seu-provedor.com"
           className="w-full border rounded-xl px-4 py-3 focus:border-brand-500 outline-none"
           autoComplete="url"
         />
-        <label className="text-sm font-semibold text-slate-700 block">Chave da API do provedor</label>
+        <label className="text-sm font-semibold text-slate-700 block">Token da instância WhatsApp</label>
         <input
           value={providerApiKey}
           onChange={e => setProviderApiKey(e.target.value)}
-          placeholder={providerConfigured ? 'Chave já salva (digite apenas para substituir)' : 'Cole a chave da API aqui'}
+          placeholder={providerConfigured ? 'Token já salvo (digite apenas para substituir)' : 'Cole o token da instância aqui'}
           type="password"
           autoComplete="new-password"
           className="w-full border rounded-xl px-4 py-3 focus:border-brand-500 outline-none"
@@ -246,7 +267,7 @@ export default function WhatsAppConnection() {
           </button>
           {providerConfigured && <span className="text-sm text-emerald-700 flex items-center gap-2"><CheckCircle2 size={16}/>URL salva; a chave fica protegida no servidor.</span>}
         </div>
-        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-xl p-3">Se você ainda não tem uma API Evolution hospedada ou uma conta de provedor compatível, essa é a única etapa externa que falta: o Horizon não pode gerar um QR de WhatsApp real sem um servidor de sessão.</p>
+        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-xl p-3">Ainda não tem provedor? <a href="https://go.whatsevolution.com.br/" target="_blank" rel="noreferrer" class="font-semibold underline">Teste o Evolution Go por 7 dias sem cartão</a>; depois, o plano informado pelo serviço é R$ 29,90/mês por instância. É uma API não oficial e existe risco de restrição/bloqueio do número; prefira um número dedicado e envie somente para contatos que autorizaram mensagens.</p>
       </div>
 
       <div className="rounded-2xl border border-slate-200 p-5 bg-white">
@@ -264,9 +285,14 @@ export default function WhatsAppConnection() {
           </button>
         </div>
         <p className="text-xs text-slate-500 mt-2">A validação confere o formato. A conexão real acontece quando você escanear o QR com a conta desejada.</p>
-        <button disabled={busy || !providerConfigured || !phoneValidated} onClick={prepareConnection} className="mt-4 w-full md:w-auto px-5 py-3 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 disabled:opacity-50 flex items-center justify-center gap-2">
-          <QrCode size={18}/>{busy ? 'Conectando...' : pending ? 'Gerar novo QR' : 'Gerar QR real de conexão'}
-        </button>
+        <div className="mt-4 flex flex-col sm:flex-row gap-3">
+          <button disabled={busy || !providerConfigured || !phoneValidated} onClick={prepareConnection} className="w-full md:w-auto px-5 py-3 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 disabled:opacity-50 flex items-center justify-center gap-2">
+            <QrCode size={18}/>{busy ? 'Conectando...' : pending ? 'Gerar novo QR' : 'Gerar QR real de conexão'}
+          </button>
+          <button disabled={busy || !providerConfigured || !phoneValidated} onClick={generatePairingCode} className="w-full md:w-auto px-5 py-3 rounded-xl border border-slate-300 bg-white text-slate-800 font-semibold hover:bg-slate-50 disabled:opacity-50 flex items-center justify-center gap-2">
+            <Smartphone size={18}/>Gerar código de pareamento
+          </button>
+        </div>
       </div>
 
       {(qrCode || pairingCode || (pending && !connected)) && (
@@ -280,8 +306,14 @@ export default function WhatsAppConnection() {
             </div>
           )}
           {pairingCode && <div className="mt-4"><p className="text-sm text-slate-600">Código de pareamento (se preferir esse método):</p><p className="text-2xl font-mono font-bold tracking-[0.2em] mt-1">{pairingCode}</p></div>}
-          <p className="font-semibold text-slate-800 mt-4">No celular: WhatsApp → Aparelhos conectados → Conectar aparelho.</p>
-          <p className="text-sm text-slate-500 mt-1">Escaneie o QR exibido acima. Não envie códigos de verificação ou de pareamento para ninguém.</p>
+          {qrCode ? (
+            <p className="font-semibold text-slate-800 mt-4">No celular: WhatsApp → Aparelhos conectados → Conectar aparelho e escaneie o QR.</p>
+          ) : pairingCode ? (
+            <p className="font-semibold text-slate-800 mt-4">No celular: WhatsApp → Aparelhos conectados → Conectar aparelho → Conectar com número de telefone e digite o código acima.</p>
+          ) : (
+            <p className="font-semibold text-slate-800 mt-4">Aguardando o provedor gerar a autorização...</p>
+          )}
+          <p className="text-sm text-slate-500 mt-1">Digite o código apenas no WhatsApp do seu celular; nunca envie códigos de verificação para ninguém.</p>
           <button disabled={busy} onClick={checkStatus} className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border font-semibold text-sm disabled:opacity-50"><RefreshCw size={16}/>Verificar conexão</button>
         </div>
       )}
