@@ -267,7 +267,7 @@ export default function WhatsAppConnection() {
           </button>
           {providerConfigured && <span className="text-sm text-emerald-700 flex items-center gap-2"><CheckCircle2 size={16}/>URL salva; a chave fica protegida no servidor.</span>}
         </div>
-        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-xl p-3">Ainda não tem provedor? <a href="https://go.whatsevolution.com.br/" target="_blank" rel="noreferrer" class="font-semibold underline">Teste o Evolution Go por 7 dias sem cartão</a>; depois, o plano informado pelo serviço é R$ 29,90/mês por instância. É uma API não oficial e existe risco de restrição/bloqueio do número; prefira um número dedicado e envie somente para contatos que autorizaram mensagens.</p>
+        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-xl p-3">Ainda não tem provedor? <a href="https://go.whatsevolution.com.br/" target="_blank" rel="noreferrer" className="font-semibold underline">Teste o Evolution Go por 7 dias sem cartão</a>; depois, o plano informado pelo serviço é R$ 29,90/mês por instância. É uma API não oficial e existe risco de restrição/bloqueio do número; prefira um número dedicado e envie somente para contatos que autorizaram mensagens.</p>
       </div>
 
       <div className="rounded-2xl border border-slate-200 p-5 bg-white">
