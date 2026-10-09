@@ -61,10 +61,11 @@ export default function Automations() {
   const blocked = withPhone.length - allowed.length;
 
   const saveTemplate = async () => {
-    if (!templateForm.name || !templateForm.metaName) return toast.error('Informe o nome e o nome do template aprovado na Meta.');
-    const { error } = await supabase.from('whatsapp_templates').insert({ owner_id: ownerId, name: templateForm.name, meta_template_name: templateForm.metaName.trim(), language: templateForm.language, body_preview: templateForm.preview, is_active: true });
+    if (!templateForm.name.trim() || !templateForm.preview.trim()) return toast.error('Informe o nome e o texto da mensagem.');
+    const generatedKey = templateForm.metaName.trim() || `horizon_${templateForm.name.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || Date.now()}`;
+    const { error } = await supabase.from('whatsapp_templates').insert({ owner_id: ownerId, name: templateForm.name.trim(), meta_template_name: generatedKey, language: templateForm.language || 'pt_BR', body_preview: templateForm.preview.trim(), is_active: true });
     if (error) return toast.error(error.message);
-    toast.success('Template salvo.');
+    toast.success('Modelo de mensagem salvo.');
     setTemplateForm({ name: '', metaName: '', language: 'pt_BR', preview: '' });
     refresh();
   };
@@ -149,11 +150,11 @@ export default function Automations() {
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <section className="premium-card p-6 space-y-4">
-          <div className="flex items-center gap-2"><MessageSquare size={20}/><h3 className="font-bold text-lg">Template oficial</h3></div>
+          <div className="flex items-center gap-2"><MessageSquare size={20}/><h3 className="font-bold text-lg">Modelo de mensagem</h3></div>
           <input value={templateForm.name} onChange={e=>setTemplateForm({...templateForm,name:e.target.value})} placeholder="Nome interno: Ex. Prospecção condomínio" className="w-full border rounded-xl px-4 py-3" />
-          <input value={templateForm.metaName} onChange={e=>setTemplateForm({...templateForm,metaName:e.target.value})} placeholder="Nome aprovado na Meta: ex. proposta_condominio" className="w-full border rounded-xl px-4 py-3" />
-          <div className="grid grid-cols-3 gap-3"><input value={templateForm.language} onChange={e=>setTemplateForm({...templateForm,language:e.target.value})} className="border rounded-xl px-4 py-3"/><textarea value={templateForm.preview} onChange={e=>setTemplateForm({...templateForm,preview:e.target.value})} placeholder="Prévia da mensagem" className="col-span-2 border rounded-xl px-4 py-3 min-h-24" /></div>
-          <button onClick={saveTemplate} className="bg-slate-900 text-white rounded-xl px-4 py-3 font-semibold flex items-center gap-2"><Plus size={18}/>Salvar template</button>
+          <input value={templateForm.metaName} onChange={e=>setTemplateForm({...templateForm,metaName:e.target.value})} placeholder="Identificador técnico (opcional)" className="w-full border rounded-xl px-4 py-3" />
+          <div className="grid grid-cols-3 gap-3"><input value={templateForm.language} onChange={e=>setTemplateForm({...templateForm,language:e.target.value})} className="border rounded-xl px-4 py-3"/><textarea value={templateForm.preview} onChange={e=>setTemplateForm({...templateForm,preview:e.target.value})} placeholder="Texto enviado via QR. Use {{1}} para inserir o nome do contato." className="col-span-2 border rounded-xl px-4 py-3 min-h-24" /></div>
+          <button onClick={saveTemplate} className="bg-slate-900 text-white rounded-xl px-4 py-3 font-semibold flex items-center gap-2"><Plus size={18}/>Salvar modelo</button><p className="text-xs text-slate-500">Na conexão por QR, o texto acima é a mensagem enviada. O identificador é gerado automaticamente se ficar vazio.</p>
         </section>
 
         <section className="premium-card p-6 space-y-4">
@@ -185,7 +186,7 @@ export default function Automations() {
 
       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
         <div className="font-semibold flex gap-2 items-center"><Clock3 size={17}/>Envio externo</div>
-        <p className="mt-1">A agenda e a fila já ficam no Supabase. Para o disparo real, ainda é necessário concluir a conexão da WhatsApp Business Platform ou conectar um provedor QR no backend.</p>
+        <p className="mt-1">A fila fica no Supabase e o servidor a verifica a cada minuto. O envio real acontece pela API QR configurada quando a sessão estiver conectada; contatos sem autorização ativa não recebem mensagens.</p>
       </div>
     </div>
   );
