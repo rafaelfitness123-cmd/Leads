@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { parseRawText, ParsedLead } from '../lib/gemini';
-import { collection, addDoc, Timestamp, onSnapshot, query, where, getDocs, doc, updateDoc, increment } from 'firebase/firestore';
+import { collection, addDoc, Timestamp, onSnapshot, query, where, getDocs, doc, updateDoc, increment } from '../supabase-firestore';
 import { db, auth } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/error-handler';
 import { toast } from 'sonner';

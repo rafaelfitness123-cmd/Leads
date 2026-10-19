@@ -14,7 +14,7 @@ import {
   Columns as KanbanIcon,
   Search
 } from 'lucide-react';
-import { collection, query, where, onSnapshot, addDoc, Timestamp, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, Timestamp, deleteDoc, doc, updateDoc } from '../supabase-firestore';
 import { db, auth } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/error-handler';
 import { motion, AnimatePresence } from 'framer-motion';

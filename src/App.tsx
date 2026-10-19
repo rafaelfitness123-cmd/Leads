@@ -17,8 +17,8 @@ import {
   CalendarClock
 } from 'lucide-react';
 import { auth, db } from './firebase';
-import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, User } from 'firebase/auth';
-import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
+import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, User } from './supabase-auth';
+import { doc, getDoc, setDoc, Timestamp } from './supabase-firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster, toast } from 'sonner';
 

@@ -12,7 +12,7 @@ import {
   Tag,
   Zap
 } from 'lucide-react';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from '../supabase-firestore';
 import { db, auth } from '../firebase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';

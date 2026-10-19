@@ -10,7 +10,7 @@ import {
   Plus,
   Instagram
 } from 'lucide-react';
-import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, orderBy } from '../supabase-firestore';
 import { db, auth } from '../firebase';
 import { motion } from 'framer-motion';
 import { 

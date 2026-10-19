@@ -22,9 +22,12 @@ import {
   Trash2,
   Plus,
   TrendingUp,
-  Info
+  Info,
+  Phone,
+  MessageCircle,
+  ShieldCheck
 } from 'lucide-react';
-import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, Timestamp, orderBy, getDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, Timestamp, orderBy, getDoc } from '../supabase-firestore';
 import { db, auth } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/error-handler';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -121,20 +124,98 @@ export default function Leads({ boardId, onClearBoard }: LeadsProps) {
     lead.city?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleCopyMessage = (lead: Lead) => {
-    if (!lead.assignedMessage) {
-      toast.error('Nenhuma mensagem vinculada a este lead.');
+  const normalizePhone = (value?: string | null) => {
+    const digits = (value || '').replace(/\D/g, '');
+    if (!digits) return '';
+    return digits.startsWith('55') ? digits : digits.length >= 10 ? `55${digits}` : digits;
+  };
+
+  const hasWhatsAppConsent = (lead: Lead) => Boolean(
+    lead.whatsappAllowed &&
+    lead.whatsappAllowedAt &&
+    lead.whatsappConsentSource?.trim()
+  );
+
+  const getLeadMessage = (lead: Lead) => {
+    let message = lead.assignedMessage ||
+      'Olá, tudo bem? Aqui é {nome_vendedor}. Conforme nossa conversa e com sua autorização, estou enviando uma ideia para o {nome}, em {cidade}. Desenvolvo sites e sistemas para condomínios, com foco em reunir contatos oficiais, informações importantes e comunicados em um só lugar. Se fizer sentido, também podemos avaliar uma área do morador para documentos e solicitações. Posso lhe mostrar uma demonstração breve, pensada para a realidade de vocês, sem compromisso?';
+
+    message = message.replace(/{nome}/g, lead.name || 'o condomínio');
+    message = message.replace(/{cidade}/g, lead.city || 'sua região');
+    message = message.replace(/{instagram}/g, lead.instagramHandle ? `@${lead.instagramHandle}` : '');
+    message = message.replace(/{niche}/g, boardName || 'condomínios');
+    message = message.replace(/{nome_vendedor}/g, auth.currentUser?.displayName || 'a equipe de desenvolvimento');
+    return message;
+  };
+
+  const getWhatsAppUrl = (lead: Lead) => {
+    const phone = normalizePhone(lead.phone);
+    if (!phone || !hasWhatsAppConsent(lead)) return null;
+    return `https://wa.me/${phone}?text=${encodeURIComponent(getLeadMessage(lead))}`;
+  };
+
+  const handleRegisterWhatsAppConsent = async (lead: Lead) => {
+    if (!normalizePhone(lead.phone)) {
+      toast.error('Cadastre e confirme um telefone válido antes de registrar a autorização.');
       return;
     }
 
-    let message = lead.assignedMessage;
-    message = message.replace(/{nome}/g, lead.name || '');
-    message = message.replace(/{cidade}/g, lead.city || '');
-    message = message.replace(/{instagram}/g, `@${lead.instagramHandle}`);
-    message = message.replace(/{niche}/g, boardName || '');
+    const confirmed = window.confirm(
+      `O responsável pelo ${lead.name || 'condomínio'} já autorizou expressamente receber mensagens comerciais pelo WhatsApp? Só confirme se a autorização já foi dada.`
+    );
+    if (!confirmed) return;
 
-    navigator.clipboard.writeText(message);
-    toast.success('Mensagem personalizada copiada!');
+    const source = window.prompt(
+      'Registre como e quando a autorização foi obtida (ex.: ligação com o síndico em 19/10/2026):'
+    );
+    if (!source?.trim()) {
+      toast.error('Informe a origem da autorização para registrá-la.');
+      return;
+    }
+
+    try {
+      const consentAt = Timestamp.now();
+      const consentSource = source.trim();
+      await updateDoc(doc(db, 'leads', lead.id), {
+        whatsappAllowed: true,
+        whatsappAllowedAt: consentAt,
+        whatsappConsentSource: consentSource
+      });
+      setSelectedLead(current => current?.id === lead.id
+        ? { ...current, whatsappAllowed: true, whatsappAllowedAt: consentAt, whatsappConsentSource: consentSource }
+        : current
+      );
+      toast.success('Autorização registrada. O WhatsApp foi liberado para este lead.');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `leads/${lead.id}`);
+      toast.error('Não foi possível registrar a autorização.');
+    }
+  };
+
+  const handleRevokeWhatsAppConsent = async (lead: Lead) => {
+    if (!window.confirm(`Revogar a autorização de WhatsApp de ${lead.name || 'este lead'}?`)) return;
+    try {
+      await updateDoc(doc(db, 'leads', lead.id), {
+        whatsappAllowed: false,
+        whatsappAllowedAt: null,
+        whatsappConsentSource: null
+      });
+      setSelectedLead(current => current?.id === lead.id
+        ? { ...current, whatsappAllowed: false, whatsappAllowedAt: null, whatsappConsentSource: null }
+        : current
+      );
+      toast.success('Autorização de WhatsApp revogada.');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `leads/${lead.id}`);
+      toast.error('Não foi possível revogar a autorização.');
+    }
+  };
+
+  const handleCopyMessage = (lead: Lead) => {
+    const message = getLeadMessage(lead);
+    navigator.clipboard.writeText(message)
+      .then(() => toast.success('Mensagem personalizada copiada!'))
+      .catch(() => toast.error('Não foi possível copiar a mensagem. Verifique a permissão da área de transferência.'));
   };
 
   const statusColors: Record<LeadStatus, string> = {
@@ -288,6 +369,40 @@ export default function Leads({ boardId, onClearBoard }: LeadsProps) {
                             >
                               <Copy size={16} />
                             </button>
+                            {lead.phone && (
+                              hasWhatsAppConsent(lead) ? (
+                                <a
+                                  href={getWhatsAppUrl(lead) || undefined}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-all"
+                                  title="Abrir WhatsApp com mensagem personalizada"
+                                >
+                                  <MessageCircle size={16} />
+                                </a>
+                              ) : (
+                                <button
+                                  type="button"
+                                  disabled
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="p-2 text-slate-300 rounded-lg cursor-not-allowed"
+                                  title="WhatsApp bloqueado até registrar autorização"
+                                >
+                                  <MessageCircle size={16} />
+                                </button>
+                              )
+                            )}
+                            {lead.phone && (
+                              <a
+                                href={`tel:${normalizePhone(lead.phone)}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all"
+                                title="Ligar para solicitar autorização"
+                              >
+                                <Phone size={16} />
+                              </a>
+                            )}
                             <a 
                               href={lead.instagramUrl} 
                               target="_blank" 
@@ -500,6 +615,84 @@ export default function Leads({ boardId, onClearBoard }: LeadsProps) {
                       <Copy size={18} />
                     </button>
                   </div>
+                </div>
+
+                {/* Contact and WhatsApp */}
+                <div className="space-y-3 rounded-2xl border border-slate-100 p-4">
+                  <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
+                    <MessageCircle size={14} />
+                    Contato e WhatsApp
+                  </label>
+                  {selectedLead.phone ? (
+                    <>
+                      <p className="text-sm font-semibold text-slate-800">{selectedLead.phone}</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <a
+                          href={`tel:${normalizePhone(selectedLead.phone)}`}
+                          className="py-2.5 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-slate-200 transition-all"
+                        >
+                          <Phone size={15} />
+                          Ligar
+                        </a>
+                        {getWhatsAppUrl(selectedLead) ? (
+                          <a
+                            href={getWhatsAppUrl(selectedLead) || undefined}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all"
+                          >
+                            <MessageCircle size={15} />
+                            Abrir WhatsApp
+                          </a>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled
+                            className="py-2.5 bg-slate-100 text-slate-400 rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-not-allowed"
+                            title="Registre a autorização antes de abrir uma conversa comercial"
+                          >
+                            <MessageCircle size={15} />
+                            WhatsApp bloqueado
+                          </button>
+                        )}
+                      </div>
+                      {hasWhatsAppConsent(selectedLead) ? (
+                        <div className="space-y-2">
+                          <p className="text-xs text-emerald-700">
+                            Autorização registrada em {selectedLead.whatsappAllowedAt?.toDate().toLocaleDateString('pt-BR')} — {selectedLead.whatsappConsentSource}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => handleRevokeWhatsAppConsent(selectedLead)}
+                            className="text-xs font-semibold text-slate-500 underline hover:text-red-600"
+                          >
+                            Revogar autorização
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <p className="text-xs text-slate-500">
+                            Ainda não há autorização registrada. Ligue primeiro e só libere o WhatsApp depois que o responsável autorizar o recebimento de mensagens comerciais.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => handleRegisterWhatsAppConsent(selectedLead)}
+                            className="w-full py-2.5 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-emerald-100 transition-all"
+                          >
+                            <ShieldCheck size={15} />
+                            Registrar autorização obtida
+                          </button>
+                        </div>
+                      )}
+                      <p className="text-[11px] text-slate-400">
+                        Ao abrir, a mensagem já estará preenchida; o envio continua manual e pode ser revisado antes de enviar.
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-sm text-slate-500">
+                      Nenhum telefone confirmado. Localize um contato institucional antes de iniciar a abordagem.
+                    </p>
+                  )}
                 </div>
 
                 {/* Stats Grid */}

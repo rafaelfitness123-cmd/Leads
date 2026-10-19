@@ -1,4 +1,4 @@
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp } from './supabase-firestore';
 
 export interface UserProfile {
   uid: string;
@@ -44,6 +44,10 @@ export interface Lead {
   createdAt: Timestamp;
   notes?: string;
   assignedMessage?: string;
+  phone?: string | null;
+  whatsappAllowed?: boolean;
+  whatsappAllowedAt?: Timestamp | null;
+  whatsappConsentSource?: string | null;
 }
 
 export interface MessageCampaign {

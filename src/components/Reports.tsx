@@ -15,7 +15,7 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs } from '../supabase-firestore';
 import { db, auth } from '../firebase';
 import { Users, MessageSquare, CheckCircle2, TrendingUp, Target, Award } from 'lucide-react';
 import { motion } from 'framer-motion';

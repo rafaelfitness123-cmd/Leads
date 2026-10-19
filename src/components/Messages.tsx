@@ -11,7 +11,7 @@ import {
   Tag,
   Hash
 } from 'lucide-react';
-import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, updateDoc, Timestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, updateDoc, Timestamp } from '../supabase-firestore';
 import { db, auth } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/error-handler';
 import { motion, AnimatePresence } from 'framer-motion';
