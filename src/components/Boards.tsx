@@ -96,25 +96,25 @@ export default function Boards({ onSelectBoard }: BoardsProps) {
 
   return (
     <div className="space-y-8">
-      <header className="flex items-center justify-between">
+      <header className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold text-slate-900">Quadros de Prospecção</h2>
           <p className="text-slate-500">Gerencie suas campanhas e nichos organizados por quadros.</p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               type="text" 
               placeholder="Pesquisar quadros..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/20 outline-none transition-all w-64 shadow-sm"
+              className="w-full sm:w-64 pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/20 outline-none transition-all shadow-sm"
             />
           </div>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="bg-brand-600 text-white px-6 py-2.5 rounded-xl font-semibold flex items-center gap-2 hover:bg-brand-700 transition-all shadow-lg shadow-brand-100"
+            className="w-full sm:w-auto justify-center bg-brand-600 text-white px-4 sm:px-6 py-2.5 rounded-xl font-semibold flex items-center gap-2 hover:bg-brand-700 transition-all shadow-lg shadow-brand-100"
           >
             <Plus size={20} />
             Novo Quadro
@@ -202,7 +202,7 @@ export default function Boards({ onSelectBoard }: BoardsProps) {
       {/* Create Modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-3 sm:p-4">
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -214,7 +214,7 @@ export default function Boards({ onSelectBoard }: BoardsProps) {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden"
+              className="relative w-full max-w-md max-h-[calc(100dvh-1.5rem)] overflow-y-auto bg-white rounded-2xl shadow-2xl"
             >
               <div className="p-6 border-b border-slate-100">
                 <h3 className="text-xl font-bold text-slate-900">Novo Quadro</h3>
