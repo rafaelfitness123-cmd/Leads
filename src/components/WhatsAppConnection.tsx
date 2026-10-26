@@ -227,8 +227,8 @@ export default function WhatsAppConnection() {
   const pending = connection?.status === 'pending';
 
   return (
-    <section className="premium-card p-6 space-y-5">
-      <div className="flex items-start justify-between gap-4">
+    <section className="premium-card p-4 sm:p-6 space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <Smartphone size={22} className="text-emerald-600" />
@@ -236,7 +236,7 @@ export default function WhatsAppConnection() {
           </div>
           <p className="text-sm text-slate-500 mt-1">Conecte pelo QR, confira o estado da sessão e faça um envio de teste antes de ativar a programação.</p>
         </div>
-        <div className={`px-3 py-1.5 rounded-full text-xs font-semibold ${connected ? 'bg-emerald-100 text-emerald-700' : pending ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>
+        <div className={`self-start sm:self-auto shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold ${connected ? 'bg-emerald-100 text-emerald-700' : pending ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>
           {connected ? '● Conectado' : pending ? '● Aguardando confirmação' : '● Não conectado'}
         </div>
       </div>
