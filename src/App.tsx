@@ -12,6 +12,8 @@ import {
   Search,
   Plus,
   Bell,
+  Menu,
+  X,
   ChevronRight,
   User as UserIcon,
   CalendarClock
@@ -37,6 +39,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -94,9 +97,14 @@ export default function App() {
     }
   };
 
+  const navigateTo = (tab: string) => {
+    setActiveTab(tab);
+    setMobileNavOpen(false);
+  };
+
   if (loading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-[100dvh] w-full flex items-center justify-center bg-slate-50">
         <motion.div 
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -108,7 +116,7 @@ export default function App() {
 
   if (!user) {
     return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center bg-slate-50 p-4">
+      <div className="min-h-[100dvh] w-full flex flex-col items-center justify-center bg-slate-50 p-4">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -144,28 +152,44 @@ export default function App() {
   ];
 
   return (
-    <div className="h-screen flex bg-slate-50 overflow-hidden">
+    <div className="app-shell flex bg-slate-50 overflow-hidden">
       <Toaster position="top-right" richColors />
-      
+
+      {mobileNavOpen && (
+        <button
+          type="button"
+          aria-label="Fechar menu"
+          className="app-sidebar-backdrop fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-sm md:hidden"
+          onClick={() => setMobileNavOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col z-20">
-        <div className="p-6 flex items-center gap-3">
-          <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
-            <Instagram className="text-white w-5 h-5" />
+      <aside className={`app-sidebar fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 flex flex-col transition-transform duration-200 md:static md:z-20 md:translate-x-0 ${mobileNavOpen ? "translate-x-0" : "-translate-x-full"}`} aria-label="Menu principal">
+        <div className="p-5 sm:p-6 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 shrink-0 bg-brand-600 rounded-lg flex items-center justify-center">
+              <Instagram className="text-white w-5 h-5" />
+            </div>
+            <span className="text-xl font-bold tracking-tight text-slate-900">Horizon</span>
           </div>
-          <span className="text-xl font-bold tracking-tight text-slate-900">Horizon</span>
+          <button type="button" aria-label="Fechar menu" onClick={() => setMobileNavOpen(false)} className="md:hidden inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100">
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => (
-            <div 
+            <button
+              type="button"
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`sidebar-item ${activeTab === item.id ? 'active' : ''}`}
+              onClick={() => navigateTo(item.id)}
+              aria-current={activeTab === item.id ? "page" : undefined}
+              className={`sidebar-item w-full border-0 bg-transparent text-left ${activeTab === item.id ? "active" : ""}`}
             >
               <item.icon size={20} />
               <span>{item.label}</span>
-            </div>
+            </button>
           ))}
         </nav>
 
@@ -191,37 +215,41 @@ export default function App() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden relative">
+      <main className="app-main min-w-0 flex-1 flex flex-col overflow-hidden relative">
         {/* Header */}
-        <header className="h-16 bg-white/80 backdrop-blur-md border-bottom border-slate-200 px-8 flex items-center justify-between sticky top-0 z-10">
-          <div className="flex items-center gap-4 flex-1">
-            <div className="relative max-w-md w-full">
+        <header className="app-header h-16 shrink-0 bg-white/90 backdrop-blur-md border-b border-slate-200 px-3 sm:px-5 lg:px-8 flex items-center justify-between gap-3 sticky top-0 z-10">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <button type="button" aria-label="Abrir menu" onClick={() => setMobileNavOpen(true)} className="app-menu-trigger md:hidden inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
+              <Menu size={21} />
+            </button>
+            <div className="relative flex-1 min-w-0 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-              <input 
-                type="text" 
-                placeholder="Busca global de leads..." 
-                className="w-full pl-10 pr-4 py-2 bg-slate-100 border-transparent focus:bg-white focus:border-brand-500 rounded-xl text-sm transition-all outline-none"
+              <input
+                type="text"
+                aria-label="Busca global de leads"
+                placeholder="Buscar leads..."
+                className="w-full min-w-0 pl-9 pr-3 py-2 bg-slate-100 border-transparent focus:bg-white focus:border-brand-500 rounded-xl text-sm transition-all outline-none"
               />
             </div>
           </div>
-          
-          <div className="flex items-center gap-4">
-            <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors relative">
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button aria-label="Notificações" className="hidden sm:inline-flex p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors relative">
               <Bell size={20} />
               <span className="absolute top-2 right-2 w-2 h-2 bg-brand-500 rounded-full border-2 border-white"></span>
             </button>
-            <button 
-              onClick={() => setActiveTab('import')}
-              className="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 hover:bg-brand-700 transition-all shadow-md shadow-brand-100"
+            <button
+              onClick={() => navigateTo("import")}
+              className="bg-brand-600 text-white px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 hover:bg-brand-700 transition-all shadow-md shadow-brand-100"
             >
               <Plus size={18} />
-              Novo Lead
+              <span className="hidden sm:inline">Novo Lead</span>
             </button>
           </div>
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="app-content flex-1 min-w-0 overflow-y-auto overflow-x-hidden p-3 sm:p-5 lg:p-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab + (selectedBoardId || '')}
@@ -229,7 +257,7 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="max-w-7xl mx-auto"
+              className="w-full min-w-0 max-w-7xl mx-auto"
             >
               {activeTab === 'dashboard' && <Dashboard setActiveTab={setActiveTab} />}
               {activeTab === 'boards' && (
