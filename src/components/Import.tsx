@@ -195,7 +195,7 @@ export default function Import({ initialBoardId }: ImportProps) {
               className="w-full h-[250px] p-4 bg-slate-50 border-none rounded-xl text-sm font-mono resize-none focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-500 uppercase">Salvar no Quadro</label>
                 <select 
@@ -256,8 +256,8 @@ export default function Import({ initialBoardId }: ImportProps) {
 
         {/* Preview Section */}
         <div className="space-y-4">
-          <div className="premium-card h-[535px] flex flex-col">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+          <div className="premium-card h-[min(535px,65dvh)] min-h-[320px] flex flex-col">
+            <div className="p-4 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
               <div className="flex items-center gap-2 text-slate-900 font-semibold">
                 <Eye size={18} className="text-brand-500" />
                 <span>Prévia do Parsing</span>
@@ -269,7 +269,7 @@ export default function Import({ initialBoardId }: ImportProps) {
                 <button 
                   onClick={handleSaveLeads}
                   disabled={isSaving}
-                  className="text-sm bg-slate-900 text-white px-4 py-1.5 rounded-lg font-semibold hover:bg-slate-800 disabled:opacity-50 flex items-center gap-2 transition-all"
+                  className="w-full sm:w-auto justify-center text-sm bg-slate-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-slate-800 disabled:opacity-50 flex items-center gap-2 transition-all"
                 >
                   {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                   Importar Tudo
@@ -297,7 +297,7 @@ export default function Import({ initialBoardId }: ImportProps) {
                     >
                       <button 
                         onClick={() => handleRemoveLead(idx)}
-                        className="absolute top-2 right-2 p-1 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                        className="absolute top-2 right-2 p-1 text-slate-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
                       >
                         <Trash2 size={14} />
                       </button>
