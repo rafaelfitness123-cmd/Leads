@@ -153,8 +153,8 @@ export default function Automations() {
           <div className="flex items-center gap-2"><MessageSquare size={20}/><h3 className="font-bold text-lg">Modelo de mensagem</h3></div>
           <input value={templateForm.name} onChange={e=>setTemplateForm({...templateForm,name:e.target.value})} placeholder="Nome interno: Ex. Prospecção condomínio" className="w-full border rounded-xl px-4 py-3" />
           <input value={templateForm.metaName} onChange={e=>setTemplateForm({...templateForm,metaName:e.target.value})} placeholder="Identificador técnico (opcional)" className="w-full border rounded-xl px-4 py-3" />
-          <div className="grid grid-cols-3 gap-3"><input value={templateForm.language} onChange={e=>setTemplateForm({...templateForm,language:e.target.value})} className="border rounded-xl px-4 py-3"/><textarea value={templateForm.preview} onChange={e=>setTemplateForm({...templateForm,preview:e.target.value})} placeholder="Texto enviado via QR. Use {{1}} para inserir o nome do contato." className="col-span-2 border rounded-xl px-4 py-3 min-h-24" /></div>
-          <button onClick={saveTemplate} className="bg-slate-900 text-white rounded-xl px-4 py-3 font-semibold flex items-center gap-2"><Plus size={18}/>Salvar modelo</button><p className="text-xs text-slate-500">Na conexão por QR, o texto acima é a mensagem enviada. O identificador é gerado automaticamente se ficar vazio.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3"><input value={templateForm.language} onChange={e=>setTemplateForm({...templateForm,language:e.target.value})} className="border rounded-xl px-4 py-3"/><textarea value={templateForm.preview} onChange={e=>setTemplateForm({...templateForm,preview:e.target.value})} placeholder="Texto enviado via QR. Use {{1}} para inserir o nome do contato." className="sm:col-span-2 min-w-0 border rounded-xl px-4 py-3 min-h-24" /></div>
+          <button onClick={saveTemplate} className="w-full sm:w-auto justify-center bg-slate-900 text-white rounded-xl px-4 py-3 font-semibold flex items-center gap-2"><Plus size={18}/>Salvar modelo</button><p className="text-xs text-slate-500">Na conexão por QR, o texto acima é a mensagem enviada. O identificador é gerado automaticamente se ficar vazio.</p>
         </section>
 
         <section className="premium-card p-6 space-y-4">
@@ -162,20 +162,20 @@ export default function Automations() {
           <select value={selectedBoard} onChange={e=>setSelectedBoard(e.target.value)} className="w-full border rounded-xl px-4 py-3"><option value="">Escolha o quadro</option>{boards.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select>
           <select value={automationForm.templateId} onChange={e=>setAutomationForm({...automationForm,templateId:e.target.value})} className="w-full border rounded-xl px-4 py-3"><option value="">Escolha o template</option>{templates.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select>
           <input value={automationForm.name} onChange={e=>setAutomationForm({...automationForm,name:e.target.value})} className="w-full border rounded-xl px-4 py-3"/>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input type="datetime-local" value={automationForm.startAt} onChange={e=>setAutomationForm({...automationForm,startAt:e.target.value})} className="border rounded-xl px-3 py-3"/>
             <input type="number" min="1" value={automationForm.interval} onChange={e=>setAutomationForm({...automationForm,interval:Number(e.target.value)})} className="border rounded-xl px-3 py-3" title="Intervalo em minutos"/>
             <input type="number" min="1" value={automationForm.maxPerDay} onChange={e=>setAutomationForm({...automationForm,maxPerDay:Number(e.target.value)})} className="border rounded-xl px-3 py-3" title="Máximo por dia"/>
           </div>
           <p className="text-xs text-slate-500">Janela padrão: 09:00–18:00. Só entram na fila contatos com telefone e autorização marcada.</p>
-          <button onClick={createAutomation} className="bg-brand-600 text-white rounded-xl px-4 py-3 font-semibold flex items-center gap-2"><Play size={18}/>Criar programação</button>
+          <button onClick={createAutomation} className="w-full sm:w-auto justify-center bg-brand-600 text-white rounded-xl px-4 py-3 font-semibold flex items-center gap-2"><Play size={18}/>Criar programação</button>
         </section>
       </div>
 
       <section className="premium-card p-6">
         <div className="flex items-center justify-between mb-4"><div><h3 className="font-bold text-lg">Contatos do quadro</h3><p className="text-sm text-slate-500">Marque somente quando houver autorização ou uma base legítima para mensagem pelo WhatsApp Business.</p></div></div>
         <div className="divide-y">
-          {leads.map(lead => <div key={lead.id} className="py-3 flex items-center justify-between gap-4"><div><p className="font-semibold text-slate-900">{lead.name || 'Sem nome'}</p><p className="text-sm text-slate-500">{lead.phone || 'Sem telefone cadastrado'}</p></div><label className="flex items-center gap-2 text-sm"><input type="checkbox" disabled={!lead.phone} checked={Boolean(lead.whatsapp_allowed)} onChange={e=>setLeadPermission(lead,e.target.checked)}/><span>{lead.whatsapp_allowed ? 'Autorizado' : 'Não autorizado'}</span></label></div>)}
+          {leads.map(lead => <div key={lead.id} className="py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"><div><p className="font-semibold text-slate-900">{lead.name || 'Sem nome'}</p><p className="text-sm text-slate-500">{lead.phone || 'Sem telefone cadastrado'}</p></div><label className="flex items-center gap-2 text-sm"><input type="checkbox" disabled={!lead.phone} checked={Boolean(lead.whatsapp_allowed)} onChange={e=>setLeadPermission(lead,e.target.checked)}/><span>{lead.whatsapp_allowed ? 'Autorizado' : 'Não autorizado'}</span></label></div>)}
         </div>
       </section>
 
