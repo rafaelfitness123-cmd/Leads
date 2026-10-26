@@ -69,7 +69,7 @@ export default function Config() {
 
   return (
     <div className="space-y-8">
-      <header className="flex items-center justify-between">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold text-slate-900">Configurações</h2>
           <p className="text-slate-500">Personalize sua conta e preferências do sistema.</p>
@@ -77,7 +77,7 @@ export default function Config() {
         <button 
           onClick={handleSave}
           disabled={saving}
-          className="bg-slate-900 text-white px-6 py-2.5 rounded-xl font-semibold flex items-center gap-2 hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 disabled:opacity-50"
+          className="w-full sm:w-auto justify-center bg-slate-900 text-white px-6 py-2.5 rounded-xl font-semibold flex items-center gap-2 hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 disabled:opacity-50"
         >
           {saving ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" /> : <Save size={18} />}
           Salvar Alterações
@@ -86,12 +86,12 @@ export default function Config() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Sidebar Nav */}
-        <div className="space-y-2">
+        <div className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible lg:pb-0">
           {tabs.map((item) => (
             <div 
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all ${
+              className={`flex shrink-0 lg:w-full whitespace-nowrap items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all ${
                 activeTab === item.id ? 'bg-white border border-slate-200 shadow-sm text-brand-600' : 'text-slate-500 hover:bg-slate-100'
               }`}
             >
@@ -152,7 +152,7 @@ export default function Config() {
                     <Palette size={20} className="text-brand-500" />
                     Aparência do Sistema
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <button 
                       onClick={() => setSettings({...settings, theme: 'light'})}
                       className={`p-4 rounded-2xl border-2 transition-all text-left ${settings.theme === 'light' ? 'border-brand-500 bg-brand-50' : 'border-slate-100'}`}
@@ -184,7 +184,7 @@ export default function Config() {
                     Notificações
                   </h3>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-slate-50 rounded-2xl">
                       <div>
                         <p className="font-bold text-slate-900 text-sm">Alertas de Navegador</p>
                         <p className="text-xs text-slate-500">Receber avisos sobre novos leads qualificados.</p>
@@ -213,7 +213,7 @@ export default function Config() {
                     Segurança e Privacidade
                   </h3>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-slate-50 rounded-2xl">
                       <div>
                         <p className="font-bold text-slate-900 text-sm">Autenticação em Duas Etapas</p>
                         <p className="text-xs text-slate-500">Adicionar uma camada extra de proteção.</p>
@@ -242,7 +242,7 @@ export default function Config() {
                     Integrações Externas
                   </h3>
                   <div className="space-y-4">
-                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-slate-200">
                           <Instagram size={20} className="text-pink-600" />
@@ -268,7 +268,7 @@ export default function Config() {
                 Preferências do Sistema
               </h3>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-slate-50 rounded-2xl">
                   <div>
                     <p className="font-bold text-slate-900 text-sm">Parsing Automático</p>
                     <p className="text-xs text-slate-500">Processar textos brutos assim que forem colados.</p>
