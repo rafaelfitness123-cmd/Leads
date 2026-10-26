@@ -112,14 +112,14 @@ export default function Messages() {
 
   return (
     <div className="space-y-8">
-      <header className="flex items-center justify-between">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold text-slate-900">Biblioteca de Mensagens</h2>
           <p className="text-slate-500">Crie e organize templates de mensagens para sua prospecção.</p>
         </div>
         <button 
           onClick={() => setIsCampaignModalOpen(true)}
-          className="bg-brand-600 text-white px-6 py-2.5 rounded-xl font-semibold flex items-center gap-2 hover:bg-brand-700 transition-all shadow-lg shadow-brand-100"
+          className="w-full sm:w-auto justify-center bg-brand-600 text-white px-4 sm:px-6 py-2.5 rounded-xl font-semibold flex items-center gap-2 hover:bg-brand-700 transition-all shadow-lg shadow-brand-100"
         >
           <Plus size={20} />
           Nova Campanha
@@ -239,12 +239,12 @@ export default function Messages() {
       {/* Create Campaign Modal */}
       <AnimatePresence>
         {isCampaignModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto p-3 sm:p-4">
             <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsCampaignModalOpen(false)} />
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 space-y-4"
+              className="relative w-full max-w-md max-h-[calc(100dvh-1.5rem)] overflow-y-auto bg-white rounded-2xl shadow-2xl p-4 sm:p-6 space-y-4"
             >
               <h3 className="text-xl font-bold text-slate-900">Nova Campanha</h3>
               <form onSubmit={handleCreateCampaign} className="space-y-4">
@@ -282,12 +282,12 @@ export default function Messages() {
       {/* Create Variation Modal */}
       <AnimatePresence>
         {isVariationModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto p-3 sm:p-4">
             <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsVariationModalOpen(false)} />
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl p-6 space-y-4"
+              className="relative w-full max-w-lg max-h-[calc(100dvh-1.5rem)] overflow-y-auto bg-white rounded-2xl shadow-2xl p-4 sm:p-6 space-y-4"
             >
               <h3 className="text-xl font-bold text-slate-900">Nova Variação de Mensagem</h3>
               <p className="text-sm text-slate-500">
