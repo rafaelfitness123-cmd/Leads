@@ -229,10 +229,10 @@ export default function Leads({ boardId, onClearBoard }: LeadsProps) {
   };
 
   return (
-    <div className="h-full flex flex-col space-y-6">
+    <div className="h-full min-h-0 min-w-0 flex flex-col space-y-6">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex flex-wrap items-center gap-2 mb-1 min-w-0">
             <h2 className="text-3xl font-bold text-slate-900">Leads</h2>
             {boardName && (
               <div className="flex items-center gap-2">
@@ -254,19 +254,19 @@ export default function Leads({ boardId, onClearBoard }: LeadsProps) {
         <div className="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
           <button 
             onClick={() => setViewMode('list')}
-            className={cn("p-2 rounded-lg transition-all", viewMode === 'list' ? "bg-brand-50 text-brand-600" : "text-slate-400 hover:text-slate-600")}
+            className={cn("h-10 w-10 flex items-center justify-center p-2 rounded-lg transition-all", viewMode === 'list' ? "bg-brand-50 text-brand-600" : "text-slate-400 hover:text-slate-600")}
           >
             <ListIcon size={18} />
           </button>
           <button 
             onClick={() => setViewMode('grid')}
-            className={cn("p-2 rounded-lg transition-all", viewMode === 'grid' ? "bg-brand-50 text-brand-600" : "text-slate-400 hover:text-slate-600")}
+            className={cn("h-10 w-10 flex items-center justify-center p-2 rounded-lg transition-all", viewMode === 'grid' ? "bg-brand-50 text-brand-600" : "text-slate-400 hover:text-slate-600")}
           >
             <LayoutGrid size={18} />
           </button>
           <button 
             onClick={() => setViewMode('kanban')}
-            className={cn("p-2 rounded-lg transition-all", viewMode === 'kanban' ? "bg-brand-50 text-brand-600" : "text-slate-400 hover:text-slate-600")}
+            className={cn("h-10 w-10 flex items-center justify-center p-2 rounded-lg transition-all", viewMode === 'kanban' ? "bg-brand-50 text-brand-600" : "text-slate-400 hover:text-slate-600")}
           >
             <KanbanIcon size={18} />
           </button>
@@ -274,8 +274,8 @@ export default function Leads({ boardId, onClearBoard }: LeadsProps) {
       </header>
 
       {/* Filters & Search */}
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1">
+      <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:gap-4 min-w-0">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
             type="text" 
@@ -285,7 +285,7 @@ export default function Leads({ boardId, onClearBoard }: LeadsProps) {
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/20 outline-none transition-all shadow-sm"
           />
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+        <button className="flex shrink-0 items-center justify-center gap-2 px-3 sm:px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
           <Filter size={18} />
           Filtros
         </button>
@@ -497,7 +497,7 @@ export default function Leads({ boardId, onClearBoard }: LeadsProps) {
               className="flex gap-6 overflow-x-auto pb-6 h-full min-h-[500px]"
             >
               {(['new', 'qualified', 'contacted', 'responded', 'interested', 'proposal', 'closed'] as LeadStatus[]).map((status) => (
-                <div key={status} className="w-80 shrink-0 flex flex-col gap-4">
+                <div key={status} className="w-[82vw] sm:w-80 shrink-0 flex flex-col gap-4">
                   <div className="flex items-center justify-between px-2">
                     <div className="flex items-center gap-2">
                       <h3 className="font-bold text-slate-900 capitalize">{status}</h3>
@@ -570,10 +570,10 @@ export default function Leads({ boardId, onClearBoard }: LeadsProps) {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-screen w-full max-w-md bg-white shadow-2xl z-50 flex flex-col"
+              className="fixed top-0 right-0 h-[100dvh] w-full max-w-md bg-white shadow-2xl z-50 flex flex-col"
             >
               {/* Drawer Header */}
-              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center text-brand-600">
                     <Instagram size={20} />
@@ -592,7 +592,7 @@ export default function Leads({ boardId, onClearBoard }: LeadsProps) {
               </div>
 
               {/* Drawer Content */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-8">
+              <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-8">
                 {/* Profile Info */}
                 <div className="text-center">
                   <div className="w-24 h-24 bg-slate-100 rounded-3xl mx-auto mb-4 flex items-center justify-center text-slate-300 border-4 border-white shadow-xl">
@@ -696,7 +696,7 @@ export default function Leads({ boardId, onClearBoard }: LeadsProps) {
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-3 gap-3">
+                <div className="lead-stats-grid grid grid-cols-3 gap-2 sm:gap-3">
                   <div className="bg-slate-50 p-3 rounded-2xl text-center">
                     <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Seguidores</p>
                     <p className="text-sm font-bold text-slate-900">{formatFollowers(selectedLead.followersCount || 0)}</p>
